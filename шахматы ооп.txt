@@ -1,0 +1,681 @@
+from matplotlib import pyplot as plt
+# основная функция игры
+def Igra_v_shaxmati(b, Figurki):
+    # ход пешки для взятия на проходе
+    na_proxode = 0
+    # счетчик ходов
+    counter_XOXDOV = 1
+
+    while True:
+        # белый - True, черный - False
+        cvet = counter_XOXDOV % 2
+        if cvet == True:
+            print(counter_XOXDOV, "Ход белых:")
+        else:
+            print(counter_XOXDOV, "Ход черных:")
+
+        b.VIVOD_DOSKI()
+
+        # получение координат
+        s1 = input("Введите координаты фигуры: ")
+        if s1 == "стоп" or s1 == "stop" or s1 == "конец":
+            print("КОНЕЦ(ИГРА ВСЁ)")
+            img = plt.imread('xxx.jpg')
+            plt.imshow(img)
+            plt.show()
+            break
+        try:
+            x0, y0 = proverka_kordinat(s1)
+            x0, y0 = Zashita_ot_duraka(x0, y0, cvet, Figurki, b)
+            for i in Figurki:
+                if i.x0 == x0 and i.y0 == y0:
+                    b.potensial_poss(x0, y0, i)
+        except:
+            print("Заново!")
+            print()
+            continue
+
+        s2 = input("Введите координаты позиции: ")
+        if s2 == "стоп" or s2 == "stop" or s2 == "конец":
+            print("КОНЕЦ(ИГРА ВСЁ).")
+            img = plt.imread('xxx.jpg')
+            plt.imshow(img)
+            plt.show()
+            break
+
+        # проверяем координаты и ход на корректность
+        try:
+            # перевод координат
+
+            x, y = proverka_kordinat(s2)
+
+            for i in Figurki:
+                if i.x0 == x0 and i.y0 == y0 and i.Iconka.lower() == "p":
+                    # взятие на проходе
+                    if i.taking_on_pass(na_proxode, x, y, b) == False:
+                        x0, y0, x, y = Zashita_ot_duraka_2(x0, y0, x, y, cvet, Figurki, b)
+
+            # сохраняем вид хода пешки для взятия на проходе (1 - длинный, 0 - нет)
+            if b.doska[x0][y0].lower() == 'p' and abs(x0 - x) == 2:
+                na_proxode = 1
+            else:
+                na_proxode = 0
+
+
+        except:
+            print("Заново!")
+            print()
+            continue
+
+        # если все в порядке, делаем ход
+        counter_XOXDOV += 1
+        for i in Figurki:
+            if i.x0 == x0 and i.y0 == y0:
+                b.doska[x][y] = b.doska[x0][y0]
+                b.doska[x0][y0] = '*'
+                i.x0 = x
+                i.y0 = y
+
+        # превращение пешки
+        for i in range(len(Figurki)):
+            if (Figurki[i].x0 == 0 and Figurki[i].Iconka == 'P') or (Figurki[i].x0 == 7 and Figurki[i].Iconka == 'p'):
+                while True:
+                    sp = input("Выберите фигуру для превращения (prnbq): ")
+                    if len(sp) == 1 and sp.lower() in 'prnbq':
+                        if sp.lower() == 'q':
+                            Figurki[i] = FERJ(Figurki[i].x0, Figurki[i].y0, cvet, b)
+                        elif sp.lower() == 'b':
+                            Figurki[i] = slon(Figurki[i].x0, Figurki[i].y0, cvet, b)
+                        elif sp.lower() == 'n':
+                            Figurki[i] = kon_loshad(Figurki[i].x0, Figurki[i].y0, cvet, b)
+                        elif sp.lower() == 'r':
+                            Figurki[i] = ladia(Figurki[i].x0, Figurki[i].y0, cvet, b)
+                        elif sp.lower() == 'p':
+                            Figurki[i] = pesjka(Figurki[i].x0, Figurki[i].y0, cvet, b)
+                        break
+                    else:
+                        print('Некорректный ввод! Повторите ввод:')
+                        print()
+                        continue
+
+# основная функция игры в шашки
+def igra_v_shashki(b, Figurki):
+    # счетчик ходов
+    counter_XOXDOV = 1
+
+    while True:
+        # белый цвет - True или 1, черный - False или 0
+        cvet = counter_XOXDOV % 2
+        if cvet == True:
+            print(counter_XOXDOV, "Ходят белые")
+        else:
+            print(counter_XOXDOV, "Ходят черные")
+
+        b.VIVOD_DOSKI()
+
+        # получение координат
+        s1 = input("Введите координаты фигуры: ")
+        if s1 == "стоп" or s1 == "stop" or s1 == "конец":
+            print("КОНЕЦ(ИГРА ВСЁ).")
+            img = plt.imread('xxx.jpg')
+            plt.imshow(img)
+            plt.show()
+            break
+        try:
+            x0, y0 = proverka_kordinat(s1)
+        except:
+            print("Заново!")
+            print()
+            continue
+
+        while True:
+            s2 = input("Введите координаты позиции: ")
+            if s2 == "стоп" or s2 == "stop" or s2 == "конец":
+                print("КОНЕЦ(ИГРА ВСЁ).")
+                img = plt.imread('xxx.jpg')
+                plt.imshow(img)
+                plt.show()
+                break
+
+            # проверка корректности координат и хода
+            try:
+                # расшифровка координат
+
+                x, y = proverka_kordinat(s2)
+                x0, y0, x, y = Zashita_ot_duraka_2(x0, y0, x, y, cvet, Figurki, b)
+
+
+            except:
+                print("Заново!")
+                print()
+                break
+
+            # если все в порядке, делаем ход
+
+            for i in Figurki:
+                if i.x0 == x0 and i.y0 == y0:
+                    f = i
+            if abs(x - x0) == 1:
+                b.doska[x][y] = b.doska[x0][y0]
+                b.doska[x0][y0] = '*'
+                f.x0 = x
+                f.y0 = y
+                counter_XOXDOV += 1
+                break
+            else:
+                b.doska[x][y] = b.doska[x0][y0]
+                b.doska[x0][y0] = '*'
+                b.doska[int(x0 - (x0 - x) / 2)][int(y0 - (y0 - y) / 2)] = "*"
+                f.x0 = x
+                f.y0 = y
+                x0 = x
+                y0 = y
+                if f.chpek_2(b) == False:
+                    counter_XOXDOV += 1
+                    break
+                b.VIVOD_DOSKI()
+
+
+
+def START():
+    print("Игра в шахматы - 1, игра в шахматы с новыми фигурами - 2, шашки - 3")
+    x = input()
+    if x == "1":
+        self = POLE()
+        Figurki = POLE.Zapolnenie(self)
+        Igra_v_shaxmati(self, Figurki)
+    elif x == "2":
+        self = POLE()
+        Figurki = POLE.Zapolnenie_NOVOE(self)
+        Igra_v_shaxmati(self, Figurki)
+    elif x == "3":
+        self = POLE()
+        Figurki = POLE.Zapolnenie_shashki(self)
+        igra_v_shashki(self, Figurki)
+    else:
+        print('Некорректный ввод!')
+
+
+# класс доски
+class POLE():
+    def __init__(self):
+        self.doska = []
+        [self.doska.append(["*"] * 8) for i in range(8)]
+
+    # вывод доски
+    def VIVOD_DOSKI(self):
+        print('   A B C D E F G H')
+        for i in range(8):
+            print(str(8 - i), end=' ')
+            [print(self.doska[i][j], end=' ') for j in range(8)]
+            print(str(8 - i))
+        print('   A B C D E F G H')
+        print()
+
+    # вывод доски с выделением доступных ходов
+    def potensial_poss(self, x_f, y_f, figure):
+        print('Возможные ходы отображаются символом |: ')
+        print('   A B C D E F G H')
+
+        for i in range(8):
+            print(str(8 - i), end=' ')
+
+            # если выбранная фигура может ходить на позицию, заменяем
+            for j in range(8):
+                if figure.check(i, j, self) == True:
+                    print('|', end=' ')
+                else:
+                    print(self.doska[i][j], end=' ')
+
+            print(str(8 - i))
+
+        print('   A B C D E F G H')
+
+
+
+    # функция заполнения игровой доски фигурами
+    def Zapolnenie(self):
+        Figurki = [
+            slon(0, 2, False, self),
+            slon(0, 5, False, self),
+            slon(7, 2, True, self),
+            slon(7, 5, True, self),
+
+            kon_loshad(0, 1, False, self),
+            kon_loshad(0, 6, False, self),
+            kon_loshad(7, 1, True, self),
+            kon_loshad(7, 6, True, self),
+
+            ladia(0, 0, False, self),
+            ladia(0, 7, False, self),
+            ladia(7, 0, True, self),
+            ladia(7, 7, True, self),
+
+            FERJ(0, 3, False, self),
+            FERJ(7, 3, True, self),
+
+            king_cock(0, 4, False, self),
+            king_cock(7, 4, True, self),
+
+            pesjka(1, 0, False, self),
+            pesjka(1, 1, False, self),
+            pesjka(1, 2, False, self),
+            pesjka(1, 3, False, self),
+            pesjka(1, 4, False, self),
+            pesjka(1, 5, False, self),
+            pesjka(1, 6, False, self),
+            pesjka(1, 7, False, self),
+
+            pesjka(6, 0, True, self),
+            pesjka(6, 1, True, self),
+            pesjka(6, 2, True, self),
+            pesjka(6, 3, True, self),
+            pesjka(6, 4, True, self),
+            pesjka(6, 5, True, self),
+            pesjka(6, 6, True, self),
+            pesjka(6, 7, True, self)
+        ]
+        return Figurki
+
+    # функция заполнения игровой доски фигурами
+    def Zapolnenie_NOVOE(self):
+        Figurki = [
+            slon(0, 2, False, self),
+            slon(0, 5, False, self),
+            slon(7, 2, True, self),
+            slon(7, 5, True, self),
+
+            Veblyad(0, 1, False, self),
+            Veblyad(0, 6, False, self),
+            Veblyad(7, 1, True, self),
+            Veblyad(7, 6, True, self),
+
+            ladia(0, 0, False, self),
+            ladia(0, 7, False, self),
+            ladia(7, 0, True, self),
+            ladia(7, 7, True, self),
+
+            Super_duper_figura(0, 3, False, self),
+            Super_duper_figura(7, 3, True, self),
+
+            king_cock(0, 4, False, self),
+            king_cock(7, 4, True, self),
+
+            pesjka(1, 0, False, self),
+            pesjka(1, 1, False, self),
+            pesjka(1, 2, False, self),
+            pesjka(1, 3, False, self),
+            Slon_KON(1, 4, False, self),
+            pesjka(1, 5, False, self),
+            pesjka(1, 6, False, self),
+            pesjka(1, 7, False, self),
+
+            pesjka(6, 0, True, self),
+            pesjka(6, 1, True, self),
+            pesjka(6, 2, True, self),
+            pesjka(6, 3, True, self),
+            Slon_KON(6, 4, True, self),
+            pesjka(6, 5, True, self),
+            pesjka(6, 6, True, self),
+            pesjka(6, 7, True, self)
+        ]
+        return Figurki
+
+    def Zapolnenie_shashki(self):
+        shashko = [
+            Shaashka(0, 1, False, self),
+            Shaashka(0, 3, False, self),
+            Shaashka(0, 5, False, self),
+            Shaashka(0, 7, False, self),
+            Shaashka(1, 0, False, self),
+            Shaashka(1, 2, False, self),
+            Shaashka(1, 4, False, self),
+            Shaashka(1, 6, False, self),
+            Shaashka(2, 1, False, self),
+            Shaashka(2, 3, False, self),
+            Shaashka(2, 5, False, self),
+            Shaashka(2, 7, False, self),
+
+            Shaashka(6, 1, True, self),
+            Shaashka(6, 3, True, self),
+            Shaashka(6, 5, True, self),
+            Shaashka(6, 7, True, self),
+            Shaashka(7, 0, True, self),
+            Shaashka(7, 2, True, self),
+            Shaashka(7, 4, True, self),
+            Shaashka(7, 6, True, self),
+            Shaashka(5, 0, True, self),
+            Shaashka(5, 2, True, self),
+            Shaashka(5, 4, True, self),
+            Shaashka(5, 6, True, self),
+        ]
+        return shashko
+
+
+#конь
+class kon_loshad():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "N"
+        else:
+            self.Iconka = "n"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        if (x - self.x0)**2 + (y - self.y0)**2 == 5:
+            return True
+        else:
+            return False
+
+# ладья
+class ladia():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "R"
+        else:
+            self.Iconka = "r"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+            
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        # ход по горизонтали
+        if self.x0 == x:
+            for i in range(min(self.y0,y) + 1, max(self.y0,y)):
+                if doska_.doska[self.x0][i] != '*':
+                    return False
+            return True
+        # ход по вертикали
+        elif self.y0 == y:
+            for i in range(min(self.x0,x) + 1, max(self.x0,x)):
+                if doska_.doska[i][self.y0] != '*':
+                    return False
+            return True
+        return False
+
+# слон
+class slon():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "B"
+        else:
+            self.Iconka = "b"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        if abs(self.x0 - x) == abs(self.y0 - y) and self.x0 - x != 0:
+            step_y = int((y - self.y0) / abs(y - self.y0))
+            step_x = int((x - self.x0) / abs(x - self.x0))
+            j = self.x0 + step_x
+            for i in range(self.y0 + step_y, y, step_y):
+                if doska_.doska[j][i] != '*':
+                    return False
+                j += step_x
+            return True
+        return False
+
+# пешка
+class pesjka():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "P"
+        else:
+            self.Iconka = "p"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        #простой ход
+        if self.y0 == y:
+            #первый ход(длинный)
+            if (self.x0 == 6 and x == 4 and doska_.doska[5][self.y0] == doska_.doska[4][self.y0] == '*' and self.cvet == True) or \
+               (self.x0 == 1 and x == 3 and doska_.doska[2][self.y0] == doska_.doska[3][self.y0] == '*' and self.cvet == False):
+                return True
+            # короткий ход
+            elif doska_.doska[x][y] == '*' and \
+                 ((self.cvet == True and self.x0 - x == 1) or \
+                 (self.cvet == False and self.x0 - x == -1)):
+                return True
+        # взятие фигур
+        elif abs(y - self.y0) == 1 and doska_.doska[x][y] != '*' and \
+             ((self.cvet == True and self.x0 - x == 1) or \
+             (self.cvet == False and self.x0 - x == -1)):
+            return True
+        return False
+
+    # проверка взятия на проходе
+    def taking_on_pass(self, na_proxode, x, y, doska_):
+        # если предыдущий ход пешки соперника не длинный
+        if na_proxode == 0:
+            return False
+        # сверху поля
+        if doska_.doska[self.x0][self.y0] == 'P' and self.x0 == 3 and x == 2 and doska_.doska[3][y] == 'p':
+            doska_.doska[3][y] = '*'
+            return True
+        # внизу поля
+        elif doska_.doska[self.x0][self.y0] == 'p' and self.x0 == 4 and x == 5 and doska_.doska[4][y] == 'P':
+            doska_.doska[4][y] = '*'
+            return True
+        return False
+
+# ферзь (королева)
+class FERJ(ladia, slon):
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "Q"
+        else:
+            self.Iconka = "q"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if ladia.check(self, x, y, doska_) == True or slon.check(self, x, y, doska_) == True:
+            return True
+        else:
+            return False
+
+# король
+class king_cock():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "K"
+        else:
+            self.Iconka = "k"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        if abs(x - self.x0) <= 1 and abs(y - self.y0) <= 1:
+            return True
+        return False
+
+# верблюд
+class Veblyad():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "V"
+        else:
+            self.Iconka = "v"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == self.cvet:
+            return False
+        if (x - self.x0) ** 2 + (y - self.y0) ** 2 == 10:
+            return True
+        else:
+            return False
+
+# вымышленная фигура (слон + конь)
+class Slon_KON(slon, kon_loshad):
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "C"
+        else:
+            self.Iconka = "c"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if kon_loshad.check(self, x, y, doska_) == True or slon.check(self, x, y, doska_) == True:
+            return True
+        else:
+            return False
+
+# вымышленная фигура 2 (король + вымышленная фигура)
+class Super_duper_figura(king_cock, Slon_KON):
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "Z"
+        else:
+            self.Iconka = "z"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+
+    def check(self, x, y, doska_):
+        if king_cock.check(self, x, y, doska_) == True or Slon_KON.check(self, x, y, doska_) == True:
+            return True
+        else:
+            return False
+    
+# шашка
+class Shaashka():
+    def __init__(self, x, y, cvet, doska_):
+        self.x0 = x
+        self.y0 = y
+        self.cvet = cvet
+        if cvet == True:
+            self.Iconka = "O"
+        else:
+            self.Iconka = "o"
+        doska_.doska[self.x0][self.y0] = self.Iconka
+        
+    def check(self, x, y, doska_):
+        if abs(y - self.y0) == 1 and doska_.doska[x][y] == '*' and \
+             ((self.cvet == True and self.x0 - x == 1) or \
+             (self.cvet == False and self.x0 - x == -1)):
+            return True
+        elif abs(x - self.x0) == abs(y - self.y0) == 2 and doska_.doska[x][y] == '*' and \
+             doska_.doska[int(self.x0 - (self.x0 - x)/2)][int(self.y0 - (self.y0 - y)/2)] != "*" and \
+             doska_.doska[int(self.x0 - (self.x0 - x)/2)][int(self.y0 - (self.y0 - y)/2)].isupper != self.cvet:
+            return True
+        return False
+    
+    def chpek_2(self, doska_):
+        try:
+            if self.check(self.x0 - 2, self.y0 - 2, doska_) == True:
+                return True
+        except:
+            pass
+
+        try:
+            if self.check(self.x0 - 2, self.y0 + 2, doska_) == True:
+                return True
+        except:
+            pass
+        
+        try:
+            if self.check(self.x0 + 2, self.y0 - 2, doska_) == True:
+                return True
+        except:
+            pass
+
+        try:
+            if self.check(self.x0 + 2, self.y0 + 2, doska_) == True:
+                return True
+        except:
+            pass
+        return False
+    
+
+# функция проверки и преобразования координат
+# ввод координат может быть в форматах: "1a", "a1", "1A", "1 a"
+def proverka_kordinat(s):
+    s = s.lower()
+    s = s.replace(" ", "")
+
+    # проверяем и преобразуем числовую координату
+    if len(s) == 2 and s[0] in '12345678' and s[1] in 'abcdefgh':
+        x, y = 8 - int(s[0]), s[1]
+    elif len(s) == 2 and s[1] in '12345678' and s[0] in 'abcdefgh':
+        x, y = 8 - int(s[1]), s[0]
+    else:
+        return False
+
+    # преобразуем буквенную координату
+    for i in range(8):
+        if y == 'abcdefgh'[i]:
+            y = i
+            break
+    return x, y
+
+
+# проверка выбора фигуры
+def Zashita_ot_duraka(x0, y0, cvet, Figurki, doska_):
+    if doska_.doska[x0][y0] == '*':
+        print("Фигуры выбери!", end='')
+        return None
+    if doska_.doska[x0][y0].isupper() != cvet:
+        print("Это не твоя фигура!", end='')
+        return None
+
+    # проверка наличия возможных ходов
+    for i in Figurki:
+        if i.x0 == x0 and i.y0 == y0:
+            f = i
+
+    for i in range(8):
+        for j in range(8):
+            if f.check(i, j, doska_) == True:
+                return x0, y0
+    # если нет
+    print("ХОДОВ НЕТ(дальше не поедем)! ", end='')
+    img = plt.imread('xxx.jpg')
+    plt.imshow(img)
+    plt.show()
+    return None
+
+
+# проверка корректности хода
+def Zashita_ot_duraka_2(x0, y0, x, y, cvet, Figurki, doska_):
+    if doska_.doska[x][y] != '*' and doska_.doska[x][y].isupper() == cvet:
+        print("Здесь уже стоит ваша фигура! ", end='')
+        return None
+    for i in Figurki:
+        if i.x0 == x0 and i.y0 == y0:
+            if i.check(x, y, doska_) == False:
+                print("Так ходить нельзя!", end='')
+                return None
+    return x0, y0, x, y
+
+START()
